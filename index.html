@@ -1,0 +1,1763 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DrawTogether - Jeu de Dessin Collaboratif</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        /* Menu principal */
+        .main-menu {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .menu-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #ffecd2, #fcb69f);
+            color: #333;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        /* Formulaires */
+        .form-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px 0;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .form-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        /* Avatar customization */
+        .avatar-section {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .avatar-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .color-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .color-option:hover, .color-option.selected {
+            border-color: #333;
+            transform: scale(1.1);
+        }
+
+        /* Zone de jeu */
+        .game-area {
+            display: none;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+            height: calc(100vh - 200px);
+        }
+
+        .game-area.active {
+            display: grid;
+        }
+
+        .drawing-section {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Outils de dessin */
+        .drawing-tools {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            flex-wrap: wrap;
+        }
+
+        .tool-btn {
+            padding: 10px 15px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .tool-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .size-slider {
+            margin: 0 10px;
+        }
+
+        .color-picker-section {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .color-picker {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid #ddd;
+            cursor: pointer;
+        }
+
+        /* Canvas */
+        .canvas-container {
+            flex: 1;
+            background: white;
+            border: 3px solid #e0e0e0;
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #drawingCanvas {
+            display: block;
+            cursor: crosshair;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .game-info, .players-list, .chat-section {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+        }
+
+        .game-info h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .timer {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ff6b6b;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .current-word {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            color: #667eea;
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .players-list h3, .chat-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .player-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+
+        .player-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        .player-name {
+            flex: 1;
+            font-weight: bold;
+        }
+
+        .player-score {
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        /* Chat */
+        .chat-messages {
+            height: 200px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #fafafa;
+        }
+
+        .message {
+            margin: 5px 0;
+            padding: 5px 8px;
+            border-radius: 5px;
+        }
+
+        .message.system {
+            background: #e3f2fd;
+            color: #1976d2;
+            font-style: italic;
+        }
+
+        .message.guess {
+            background: #fff3e0;
+        }
+
+        .message.correct {
+            background: #e8f5e8;
+            color: #4caf50;
+            font-weight: bold;
+        }
+
+        .guess-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .game-area {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr;
+            }
+            
+            .sidebar {
+                order: -1;
+                flex-direction: row;
+                overflow-x: auto;
+            }
+            
+            .drawing-tools {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+
+        /* Animations */
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .shake {
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="C:/Users/besan/OneDrive/Bureau/Draw Together/logo.png" 
+     alt="DrawTogether Logo" 
+     style="width: 300px; height: auto; object-fit: contain;">
+
+        </div>
+
+        <!-- Menu Principal -->
+        <div id="mainMenu" class="main-menu">
+            <h2 style="margin-bottom: 30px;">Bienvenue dans DrawTogether !</h2>
+            <div class="menu-buttons">
+                <button class="btn btn-primary" onclick="showCreateRoom()">Créer un Salon</button>
+                <button class="btn btn-secondary" onclick="showJoinRoom()">Rejoindre un Salon</button>
+            </div>
+        </div>
+
+        <!-- Création de salon -->
+        <div id="createRoomForm" class="form-section">
+            <h3 style="text-align: center; margin-bottom: 30px;">Créer un nouveau salon</h3>
+            
+            <div class="avatar-section">
+                <div>
+                    <label>Votre Avatar</label>
+                    <div id="avatarPreview" class="avatar-preview" style="background: #667eea;">A</div>
+                </div>
+                <div style="flex: 1;">
+                    <label>Pseudo</label>
+                    <input type="text" id="hostPseudo" class="form-control" placeholder="Entrez votre pseudo" maxlength="15">
+                    <label style="margin-top: 10px;">Couleur d'avatar</label>
+                    <div class="color-palette" id="avatarColors">
+                        <div class="color-option selected" style="background: #667eea;" data-color="#667eea"></div>
+                        <div class="color-option" style="background: #ff6b6b;" data-color="#ff6b6b"></div>
+                        <div class="color-option" style="background: #4ecdc4;" data-color="#4ecdc4"></div>
+                        <div class="color-option" style="background: #45b7d1;" data-color="#45b7d1"></div>
+                        <div class="color-option" style="background: #96ceb4;" data-color="#96ceb4"></div>
+                        <div class="color-option" style="background: #feca57;" data-color="#feca57"></div>
+                        <div class="color-option" style="background: #ff9ff3;" data-color="#ff9ff3"></div>
+                        <div class="color-option" style="background: #54a0ff;" data-color="#54a0ff"></div>
+                        <div class="color-option" style="background: #5f27cd;" data-color="#5f27cd"></div>
+                        <div class="color-option" style="background: #00d2d3;" data-color="#00d2d3"></div>
+                        <div class="color-option" style="background: #ff9f43;" data-color="#ff9f43"></div>
+                        <div class="color-option" style="background: #10ac84;" data-color="#10ac84"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="roomName">Nom du salon</label>
+                <input type="text" id="roomName" class="form-control" placeholder="Mon super salon" maxlength="30">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="form-group">
+                    <label for="maxPlayers">Nombre max de joueurs</label>
+                    <select id="maxPlayers" class="form-control">
+                        <option value="4">4 joueurs</option>
+                        <option value="6">6 joueurs</option>
+                        <option value="8" selected>8 joueurs</option>
+                        <option value="10">10 joueurs</option>
+                        <option value="12">12 joueurs</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="roundTime">Temps par tour (secondes)</label>
+                    <select id="roundTime" class="form-control">
+                        <option value="30">30 secondes</option>
+                        <option value="60" selected>60 secondes</option>
+                        <option value="90">90 secondes</option>
+                        <option value="120">120 secondes</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="btn btn-primary" onclick="createRoom()">Créer le Salon</button>
+                <button class="btn btn-secondary" onclick="backToMenu()">Retour</button>
+            </div>
+        </div>
+
+        <!-- Rejoindre un salon -->
+        <div id="joinRoomForm" class="form-section">
+            <h3 style="text-align: center; margin-bottom: 30px;">Rejoindre un salon</h3>
+            
+            <div class="avatar-section">
+                <div>
+                    <label>Votre Avatar</label>
+                    <div id="joinAvatarPreview" class="avatar-preview" style="background: #667eea;">A</div>
+                </div>
+                <div style="flex: 1;">
+                    <label>Pseudo</label>
+                    <input type="text" id="joinPseudo" class="form-control" placeholder="Entrez votre pseudo" maxlength="15">
+                    <label style="margin-top: 10px;">Couleur d'avatar</label>
+                    <div class="color-palette" id="joinAvatarColors">
+                        <div class="color-option selected" style="background: #667eea;" data-color="#667eea"></div>
+                        <div class="color-option" style="background: #ff6b6b;" data-color="#ff6b6b"></div>
+                        <div class="color-option" style="background: #4ecdc4;" data-color="#4ecdc4"></div>
+                        <div class="color-option" style="background: #45b7d1;" data-color="#45b7d1"></div>
+                        <div class="color-option" style="background: #96ceb4;" data-color="#96ceb4"></div>
+                        <div class="color-option" style="background: #feca57;" data-color="#feca57"></div>
+                        <div class="color-option" style="background: #ff9ff3;" data-color="#ff9ff3"></div>
+                        <div class="color-option" style="background: #54a0ff;" data-color="#54a0ff"></div>
+                        <div class="color-option" style="background: #5f27cd;" data-color="#5f27cd"></div>
+                        <div class="color-option" style="background: #00d2d3;" data-color="#00d2d3"></div>
+                        <div class="color-option" style="background: #ff9f43;" data-color="#ff9f43"></div>
+                        <div class="color-option" style="background: #10ac84;" data-color="#10ac84"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="roomCode">Code du salon</label>
+                <input type="text" id="roomCode" class="form-control" placeholder="Entrez le code du salon" maxlength="6">
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="btn btn-primary" onclick="joinRoom()">Rejoindre</button>
+                <button class="btn btn-secondary" onclick="backToMenu()">Retour</button>
+            </div>
+        </div>
+
+        <!-- Zone de jeu -->
+        <div id="gameArea" class="game-area">
+            <div class="drawing-section">
+                <!-- Outils de dessin -->
+                <div class="drawing-tools">
+                    <button class="tool-btn active" data-tool="pen">✏️ Crayon</button>
+                    <button class="tool-btn" data-tool="eraser">🧽 Gomme</button>
+                    <button class="tool-btn" data-tool="fill">🪣 Pot</button>
+                    <button class="tool-btn" data-tool="rect">⬜ Rectangle</button>
+                    <button class="tool-btn" data-tool="circle">⭕ Cercle</button>
+                    <button class="tool-btn" data-tool="line">📏 Ligne</button>
+                    
+                    <div style="margin-left: 20px; display: flex; align-items: center; gap: 10px;">
+                        <span>Taille:</span>
+                        <input type="range" id="brushSize" min="1" max="50" value="5" class="size-slider">
+                        <span id="brushSizeValue">5px</span>
+                    </div>
+                    
+                    <button class="tool-btn" onclick="clearCanvas()">🗑️ Effacer</button>
+                </div>
+
+                <!-- Palette de couleurs -->
+                <div class="color-picker-section" id="colorPalette">
+                    <div class="color-picker" style="background: #000000;" data-color="#000000"></div>
+                    <div class="color-picker" style="background: #ff0000;" data-color="#ff0000"></div>
+                    <div class="color-picker" style="background: #00ff00;" data-color="#00ff00"></div>
+                    <div class="color-picker" style="background: #0000ff;" data-color="#0000ff"></div>
+                    <div class="color-picker" style="background: #ffff00;" data-color="#ffff00"></div>
+                    <div class="color-picker" style="background: #ff00ff;" data-color="#ff00ff"></div>
+                    <div class="color-picker" style="background: #00ffff;" data-color="#00ffff"></div>
+                    <div class="color-picker" style="background: #ffffff; border-color: #ccc;" data-color="#ffffff"></div>
+                    <div class="color-picker" style="background: #808080;" data-color="#808080"></div>
+                    <div class="color-picker" style="background: #800000;" data-color="#800000"></div>
+                    <div class="color-picker" style="background: #008000;" data-color="#008000"></div>
+                    <div class="color-picker" style="background: #000080;" data-color="#000080"></div>
+                    <div class="color-picker" style="background: #808000;" data-color="#808000"></div>
+                    <div class="color-picker" style="background: #800080;" data-color="#800080"></div>
+                    <div class="color-picker" style="background: #008080;" data-color="#008080"></div>
+                    <div class="color-picker" style="background: #c0c0c0;" data-color="#c0c0c0"></div>
+                    <div class="color-picker" style="background: #ff6b35;" data-color="#ff6b35"></div>
+                    <div class="color-picker" style="background: #f7931e;" data-color="#f7931e"></div>
+                    <div class="color-picker" style="background: #ffd23f;" data-color="#ffd23f"></div>
+                    <div class="color-picker" style="background: #06ffa5;" data-color="#06ffa5"></div>
+                    <div class="color-picker" style="background: #4fb3d9;" data-color="#4fb3d9"></div>
+                    <div class="color-picker" style="background: #3c40c6;" data-color="#3c40c6"></div>
+                    <div class="color-picker" style="background: #833471;" data-color="#833471"></div>
+                    <div class="color-picker" style="background: #cd6133;" data-color="#cd6133"></div>
+                </div>
+
+                <!-- Canvas -->
+                <div class="canvas-container">
+                    <canvas id="drawingCanvas" width="800" height="600"></canvas>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <!-- Informations du jeu -->
+                <div class="game-info">
+                    <h3>🎯 Information du jeu</h3>
+                    
+                    <!-- Bouton de démarrage pour l'hôte -->
+                    <div id="startGameSection" style="text-align: center; margin-bottom: 15px; display: none;">
+                        <button id="startGameBtn" class="btn btn-primary" style="padding: 10px 20px; font-size: 0.9rem;">
+                            🚀 Démarrer la partie
+                        </button>
+                        <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+                            Minimum 2 joueurs requis
+                        </div>
+                    </div>
+                    
+                    <div class="timer pulse" id="timer">60</div>
+                    <div class="current-word" id="currentWordDisplay">En attente...</div>
+                    <div style="text-align: center; margin-top: 10px;">
+                        <span style="font-weight: bold;">Tour:</span> <span id="currentRound">1</span>/<span id="totalRounds">3</span>
+                    </div>
+                    <div style="text-align: center; margin-top: 5px;">
+                        <span style="font-weight: bold;">Salon:</span> <span id="roomCodeDisplay">#ABC123</span>
+                    </div>
+                </div>
+
+                <!-- Liste des joueurs -->
+                <div class="players-list">
+                    <h3>👥 Joueurs (<span id="playerCount">1</span>)</h3>
+                    <div id="playersContainer"></div>
+                </div>
+
+                <!-- Chat / Devinettes -->
+                <div class="chat-section">
+                    <h3>💬 Devinez le mot !</h3>
+                    <div class="chat-messages" id="chatMessages"></div>
+                    <input type="text" id="guessInput" class="guess-input" placeholder="Tapez votre réponse..." maxlength="50">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-database-compat.min.js"></script>
+    
+    <script>
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDtAlp2SgZ3kbGzUF4JHxziKtWD8J3klHk",
+            authDomain: "city-emergency-services.firebaseapp.com",
+            projectId: "city-emergency-services",
+            storageBucket: "city-emergency-services.firebasestorage.app",
+            messagingSenderId: "242194535407",
+            appId: "1:242194535407:web:4ccf4f18ed34172d9a1c1a",
+            measurementId: "G-J1SRY6MFNH",
+            databaseURL: "https://city-emergency-services-default-rtdb.europe-west1.firebasedatabase.app/"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Dictionnaire de mots
+        const wordList = [
+            'chat', 'chien', 'maison', 'voiture', 'arbre', 'fleur', 'soleil', 'lune', 'étoile', 'mer',
+            'montagne', 'rivière', 'pont', 'château', 'princesse', 'roi', 'reine', 'dragon', 'licorne', 'pingouin',
+            'éléphant', 'girafe', 'lion', 'tigre', 'ours', 'lapin', 'papillon', 'abeille', 'poisson', 'requin',
+            'baleine', 'dauphin', 'tortue', 'serpent', 'oiseau', 'aigle', 'hibou', 'corbeau', 'paon', 'flamant',
+            'pizza', 'hamburger', 'gâteau', 'glace', 'chocolat', 'bonbon', 'pomme', 'banane', 'orange', 'fraise',
+            'cerise', 'raisin', 'ananas', 'pastèque', 'carotte', 'tomate', 'salade', 'brocoli', 'champignon', 'oignon',
+            'guitare', 'piano', 'violon', 'batterie', 'trompette', 'saxophone', 'flûte', 'harpe', 'micro', 'casque',
+            'ordinateur', 'téléphone', 'télévision', 'radio', 'appareil photo', 'montre', 'lunettes', 'stylo', 'livre', 'journal',
+            'vélo', 'moto', 'avion', 'bateau', 'train', 'bus', 'camion', 'tracteur', 'fusée', 'hélicoptère',
+            'football', 'tennis', 'basket', 'volleyball', 'golf', 'natation', 'course', 'saut', 'danse', 'yoga'
+        ];
+
+        // Variables globales
+        let currentPlayer = null;
+        let currentRoom = null;
+        let gameState = {
+            isDrawing: false,
+            currentTool: 'pen',
+            currentColor: '#000000',
+            brushSize: 5
+        };
+        let gameTimer;
+
+        // Canvas et contexte
+        let canvas, ctx;
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCanvas();
+            setupEventListeners();
+            
+            // Ajouter l'événement pour le bouton de démarrage
+            setTimeout(() => {
+                const startBtn = document.getElementById('startGameBtn');
+                if (startBtn) {
+                    startBtn.addEventListener('click', function() {
+                        if (currentRoom) {
+                            database.ref('rooms/' + currentRoom).once('value').then(snapshot => {
+                                const room = snapshot.val();
+                                if (room && room.players) {
+                                    console.log('Démarrage manuel de la partie');
+                                    startGame(currentRoom, room.players);
+                                }
+                            });
+                        }
+                    });
+                    console.log('Événement ajouté au bouton de démarrage');
+                }
+            }, 100);
+        });
+
+        function initializeCanvas() {
+            canvas = document.getElementById('drawingCanvas');
+            ctx = canvas.getContext('2d');
+            
+            // Ajuster la taille du canvas
+            resizeCanvas();
+            
+            // Événements du canvas
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+            
+            // Support tactile
+            canvas.addEventListener('touchstart', handleTouch);
+            canvas.addEventListener('touchmove', handleTouch);
+            canvas.addEventListener('touchend', stopDrawing);
+        }
+
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            const containerRect = container.getBoundingClientRect();
+            canvas.width = containerRect.width - 40;
+            canvas.height = containerRect.height - 40;
+            
+            // Remplir le fond en blanc
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function setupEventListeners() {
+            // Outils de dessin
+            document.querySelectorAll('.tool-btn[data-tool]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    gameState.currentTool = this.getAttribute('data-tool');
+                    updateCursor();
+                });
+            });
+
+            // Palette de couleurs
+            document.querySelectorAll('.color-picker').forEach(picker => {
+                picker.addEventListener('click', function() {
+                    gameState.currentColor = this.getAttribute('data-color');
+                    document.querySelectorAll('.color-picker').forEach(p => p.style.border = '2px solid #ddd');
+                    this.style.border = '3px solid #333';
+                });
+            });
+
+            // Taille du pinceau
+            const brushSize = document.getElementById('brushSize');
+            const brushSizeValue = document.getElementById('brushSizeValue');
+            brushSize.addEventListener('input', function() {
+                gameState.brushSize = this.value;
+                brushSizeValue.textContent = this.value + 'px';
+            });
+
+            // Chat input
+            const guessInput = document.getElementById('guessInput');
+            guessInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendGuess();
+                }
+            });
+
+            // Avatar colors
+            setupAvatarColors();
+            
+            // Resize canvas on window resize
+            window.addEventListener('resize', resizeCanvas);
+        }
+
+        function setupAvatarColors() {
+            // Pour le formulaire de création
+            document.querySelectorAll('#avatarColors .color-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('#avatarColors .color-option').forEach(o => o.classList.remove('selected'));
+                    this.classList.add('selected');
+                    const color = this.getAttribute('data-color');
+                    document.getElementById('avatarPreview').style.background = color;
+                });
+            });
+
+            // Pour le formulaire de join
+            document.querySelectorAll('#joinAvatarColors .color-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('#joinAvatarColors .color-option').forEach(o => o.classList.remove('selected'));
+                    this.classList.add('selected');
+                    const color = this.getAttribute('data-color');
+                    document.getElementById('joinAvatarPreview').style.background = color;
+                });
+            });
+
+            // Update avatar when typing pseudo
+            document.getElementById('hostPseudo').addEventListener('input', function() {
+                const initial = this.value.charAt(0).toUpperCase() || 'A';
+                document.getElementById('avatarPreview').textContent = initial;
+            });
+
+            document.getElementById('joinPseudo').addEventListener('input', function() {
+                const initial = this.value.charAt(0).toUpperCase() || 'A';
+                document.getElementById('joinAvatarPreview').textContent = initial;
+            });
+        }
+
+        function updateCursor() {
+            if (gameState.currentTool === 'eraser') {
+                canvas.style.cursor = 'grab';
+            } else if (gameState.currentTool === 'fill') {
+                canvas.style.cursor = 'pointer';
+            } else {
+                canvas.style.cursor = 'crosshair';
+            }
+        }
+
+        // Navigation
+        function showCreateRoom() {
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('createRoomForm').classList.add('active');
+        }
+
+        function showJoinRoom() {
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('joinRoomForm').classList.add('active');
+        }
+
+        function backToMenu() {
+            document.querySelectorAll('.form-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById('mainMenu').style.display = 'block';
+            document.getElementById('gameArea').classList.remove('active');
+        }
+
+        // Création de salon
+        function createRoom() {
+            const pseudo = document.getElementById('hostPseudo').value.trim();
+            const roomName = document.getElementById('roomName').value.trim();
+            const maxPlayers = parseInt(document.getElementById('maxPlayers').value);
+            const roundTime = parseInt(document.getElementById('roundTime').value);
+            const avatarColor = document.querySelector('#avatarColors .color-option.selected').getAttribute('data-color');
+
+            if (!pseudo || pseudo.length < 2) {
+                alert('Veuillez entrer un pseudo d\'au moins 2 caractères');
+                return;
+            }
+
+            if (!roomName || roomName.length < 3) {
+                alert('Veuillez entrer un nom de salon d\'au moins 3 caractères');
+                return;
+            }
+
+            // Générer un code de salon unique
+            const roomCode = generateRoomCode();
+
+            currentPlayer = {
+                id: generatePlayerId(),
+                pseudo: pseudo,
+                avatarColor: avatarColor,
+                score: 0,
+                isHost: true
+            };
+
+            const roomData = {
+                code: roomCode,
+                name: roomName,
+                host: currentPlayer.id,
+                maxPlayers: maxPlayers,
+                roundTime: roundTime,
+                players: {
+                    [currentPlayer.id]: currentPlayer
+                },
+                gameState: {
+                    status: 'waiting', // waiting, playing, ended
+                    currentRound: 1,
+                    totalRounds: 3,
+                    currentPlayer: null,
+                    currentWord: '',
+                    timeLeft: roundTime,
+                    guessedPlayers: []
+                },
+                canvas: '',
+                messages: [],
+                createdAt: firebase.database.ServerValue.TIMESTAMP
+            };
+
+            // Sauvegarder en base
+            database.ref('rooms/' + roomCode).set(roomData).then(() => {
+                currentRoom = roomCode;
+                joinGameRoom(roomCode);
+                document.getElementById('roomCodeDisplay').textContent = '#' + roomCode;
+                showGameArea();
+                addSystemMessage(`Salon "${roomName}" créé ! Code: ${roomCode}`);
+                addSystemMessage('En attente d\'autres joueurs...');
+            }).catch(error => {
+                console.error('Erreur lors de la création du salon:', error);
+                alert('Erreur lors de la création du salon');
+            });
+        }
+
+        // Rejoindre un salon
+        function joinRoom() {
+            const pseudo = document.getElementById('joinPseudo').value.trim();
+            const roomCode = document.getElementById('roomCode').value.trim().toUpperCase();
+            const avatarColor = document.querySelector('#joinAvatarColors .color-option.selected').getAttribute('data-color');
+
+            if (!pseudo || pseudo.length < 2) {
+                alert('Veuillez entrer un pseudo d\'au moins 2 caractères');
+                return;
+            }
+
+            if (!roomCode || roomCode.length !== 6) {
+                alert('Veuillez entrer un code de salon valide (6 caractères)');
+                return;
+            }
+
+            // Vérifier si le salon existe
+            database.ref('rooms/' + roomCode).once('value').then(snapshot => {
+                if (!snapshot.exists()) {
+                    alert('Ce salon n\'existe pas');
+                    return;
+                }
+
+                const room = snapshot.val();
+                const playerCount = Object.keys(room.players || {}).length;
+
+                if (playerCount >= room.maxPlayers) {
+                    alert('Ce salon est complet');
+                    return;
+                }
+
+                // Vérifier si le pseudo est déjà pris
+                const existingPlayer = Object.values(room.players || {}).find(p => p.pseudo.toLowerCase() === pseudo.toLowerCase());
+                if (existingPlayer) {
+                    alert('Ce pseudo est déjà pris dans ce salon');
+                    return;
+                }
+
+                currentPlayer = {
+                    id: generatePlayerId(),
+                    pseudo: pseudo,
+                    avatarColor: avatarColor,
+                    score: 0,
+                    isHost: false
+                };
+
+                // Ajouter le joueur au salon
+                database.ref('rooms/' + roomCode + '/players/' + currentPlayer.id).set(currentPlayer).then(() => {
+                    currentRoom = roomCode;
+                    joinGameRoom(roomCode);
+                    document.getElementById('roomCodeDisplay').textContent = '#' + roomCode;
+                    showGameArea();
+                    addSystemMessage(`Vous avez rejoint le salon "${room.name}"`);
+                });
+
+            }).catch(error => {
+                console.error('Erreur:', error);
+                alert('Erreur lors de la connexion au salon');
+            });
+        }
+
+        function showGameArea() {
+            document.querySelectorAll('.form-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById('gameArea').classList.add('active');
+            setTimeout(resizeCanvas, 100); // Laisser le temps au CSS de s'appliquer
+        }
+
+        // Gestion de la room en temps réel
+        function joinGameRoom(roomCode) {
+            const roomRef = database.ref('rooms/' + roomCode);
+
+            // Écouter les changements de joueurs
+            roomRef.child('players').on('value', snapshot => {
+                const players = snapshot.val() || {};
+                updatePlayersList(players);
+                checkAutoStart(roomCode, players);
+            });
+
+            // Écouter les messages
+            roomRef.child('messages').on('child_added', snapshot => {
+                const message = snapshot.val();
+                if (message) {
+                    displayMessage(message);
+                }
+            });
+
+            // Écouter l'état du jeu
+            roomRef.child('gameState').on('value', snapshot => {
+                const gameState = snapshot.val();
+                if (gameState) {
+                    updateGameState(gameState);
+                }
+            });
+
+            // Écouter les changements du canvas
+            roomRef.child('canvas').on('value', snapshot => {
+                const canvasData = snapshot.val();
+                if (canvasData && canvasData !== '') {
+                    loadCanvasFromData(canvasData);
+                }
+            });
+
+            // Déconnexion automatique
+            roomRef.child('players/' + currentPlayer.id).onDisconnect().remove();
+        }
+
+        // Vérifier si on peut démarrer automatiquement
+        function checkAutoStart(roomCode, players) {
+            const playerCount = Object.keys(players).length;
+            
+            // Affichage du bouton pour l'hôte si c'est le cas
+            if (currentPlayer && currentPlayer.isHost && playerCount >= 2) {
+                addSystemMessage(`✅ ${playerCount} joueurs connectés ! Vous pouvez démarrer la partie.`);
+            }
+            
+            // Démarrage automatique désactivé pour laisser l'hôte choisir
+            // L'hôte peut maintenant utiliser le bouton "Démarrer la partie"
+        }
+
+        // Démarrer la partie
+        function startGame(roomCode, players) {
+            console.log('startGame appelé avec:', roomCode, players);
+            
+            const playerIds = Object.keys(players);
+            const firstPlayer = playerIds[0];
+            const currentWord = getRandomWord();
+            
+            console.log('Premier joueur:', firstPlayer, 'Mot:', currentWord);
+
+            // Récupérer les paramètres du salon
+            database.ref('rooms/' + roomCode).once('value').then(snapshot => {
+                const room = snapshot.val();
+                const roundTime = room.roundTime || 60;
+                
+                console.log('Temps par tour:', roundTime);
+
+                const gameUpdate = {
+                    status: 'playing',
+                    currentRound: 1,
+                    totalRounds: 3,
+                    currentPlayer: firstPlayer,
+                    currentWord: currentWord,
+                    timeLeft: roundTime,
+                    guessedPlayers: [],
+                    playerOrder: playerIds,
+                    currentPlayerIndex: 0
+                };
+
+                console.log('Mise à jour de l\'état du jeu:', gameUpdate);
+
+                return database.ref('rooms/' + roomCode + '/gameState').update(gameUpdate);
+                
+            }).then(() => {
+                console.log('État du jeu mis à jour, démarrage du timer');
+                
+                // Récupérer à nouveau pour avoir le roundTime
+                return database.ref('rooms/' + roomCode + '/roundTime').once('value');
+                
+            }).then(snapshot => {
+                const roundTime = snapshot.val() || 60;
+                
+                // Démarrer le timer
+                startRoundTimer(roomCode, roundTime);
+                
+                addSystemMessage('🎮 La partie commence !');
+                addSystemMessage(`✏️ C'est à ${players[firstPlayer].pseudo} de dessiner !`);
+                addSystemMessage(`📝 Mot à deviner: ${currentWord.length} lettres`);
+                
+                // Effacer le canvas pour commencer
+                clearCanvasForNewRound();
+                
+                console.log('Partie démarrée avec succès !');
+                
+            }).catch(error => {
+                console.error('Erreur lors du démarrage:', error);
+                alert('Erreur lors du démarrage: ' + error.message);
+            });
+        }
+
+        // Timer de la partie
+        function startRoundTimer(roomCode, initialTime = 60) {
+            console.log('Démarrage du timer pour', initialTime, 'secondes');
+            clearInterval(gameTimer);
+            
+            let timeLeft = initialTime;
+            
+            gameTimer = setInterval(() => {
+                timeLeft--;
+                database.ref('rooms/' + roomCode + '/gameState/timeLeft').set(timeLeft);
+                
+                if (timeLeft <= 0) {
+                    console.log('Temps écoulé !');
+                    clearInterval(gameTimer);
+                    endRound(roomCode);
+                }
+            }, 1000);
+        }
+
+        // Fin du tour
+        function endRound(roomCode) {
+            database.ref('rooms/' + roomCode).once('value').then(snapshot => {
+                const room = snapshot.val();
+                const gameState = room.gameState;
+                const players = room.players;
+                
+                addSystemMessage(`⏰ Temps écoulé ! Le mot était: "${gameState.currentWord}"`);
+                
+                // Passer au joueur suivant
+                const nextPlayerIndex = (gameState.currentPlayerIndex + 1) % gameState.playerOrder.length;
+                
+                if (nextPlayerIndex === 0) {
+                    // Tour suivant
+                    const nextRound = gameState.currentRound + 1;
+                    if (nextRound > gameState.totalRounds) {
+                        endGame(roomCode, players);
+                        return;
+                    }
+                    
+                    database.ref('rooms/' + roomCode + '/gameState').update({
+                        currentRound: nextRound,
+                        currentPlayerIndex: nextPlayerIndex,
+                        currentPlayer: gameState.playerOrder[nextPlayerIndex],
+                        currentWord: getRandomWord(),
+                        timeLeft: room.roundTime || 60,
+                        guessedPlayers: []
+                    });
+                } else {
+                    // Même tour, joueur suivant
+                    database.ref('rooms/' + roomCode + '/gameState').update({
+                        currentPlayerIndex: nextPlayerIndex,
+                        currentPlayer: gameState.playerOrder[nextPlayerIndex],
+                        currentWord: getRandomWord(),
+                        timeLeft: room.roundTime || 60,
+                        guessedPlayers: []
+                    });
+                }
+                
+                // Redémarrer le timer
+                setTimeout(() => {
+                    const nextPlayer = players[gameState.playerOrder[nextPlayerIndex]];
+                    addSystemMessage(`✏️ C'est au tour de ${nextPlayer.pseudo} !`);
+                    clearCanvasForNewRound();
+                    // Forcer la mise à jour du canvas dans Firebase
+                    if (currentRoom) {
+                        database.ref('rooms/' + currentRoom + '/canvas').set('');
+                    }
+                    startRoundTimer(roomCode);
+                }, 2000);
+            });
+        }
+
+        // Fin de la partie
+        function endGame(roomCode, players) {
+            // Calculer les scores finaux
+            const sortedPlayers = Object.values(players).sort((a, b) => b.score - a.score);
+            
+            database.ref('rooms/' + roomCode + '/gameState/status').set('ended');
+            
+            addSystemMessage('🏁 Partie terminée !');
+            addSystemMessage(`🏆 Gagnant: ${sortedPlayers[0].pseudo} avec ${sortedPlayers[0].score} points !`);
+            
+            // Afficher le classement
+            sortedPlayers.forEach((player, index) => {
+                const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
+                addSystemMessage(`${medal} ${player.pseudo}: ${player.score} points`);
+            });
+        }
+
+        function clearCanvasForNewRound() {
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            if (currentRoom) {
+                database.ref('rooms/' + currentRoom + '/canvas').set('');
+            }
+        }
+
+        function getRandomWord() {
+            return wordList[Math.floor(Math.random() * wordList.length)];
+        }
+
+        function updatePlayersList(players) {
+            const container = document.getElementById('playersContainer');
+            const playerCount = document.getElementById('playerCount');
+            
+            container.innerHTML = '';
+            playerCount.textContent = Object.keys(players).length;
+
+            // Obtenir l'état du jeu pour savoir qui dessine
+            let currentDrawerId = null;
+            if (currentRoom) {
+                database.ref('rooms/' + currentRoom + '/gameState/currentPlayer').once('value').then(snapshot => {
+                    currentDrawerId = snapshot.val();
+                    renderPlayersList();
+                });
+            } else {
+                renderPlayersList();
+            }
+
+            function renderPlayersList() {
+                container.innerHTML = ''; // Clear again in case of async issues
+                
+                Object.values(players).forEach(player => {
+                    const playerElement = document.createElement('div');
+                    playerElement.className = 'player-item';
+                    
+                    const isCurrentDrawer = player.id === currentDrawerId;
+                    if (isCurrentDrawer) {
+                        playerElement.style.background = 'linear-gradient(45deg, #e3f2fd, #bbdefb)';
+                        playerElement.style.border = '2px solid #2196f3';
+                        playerElement.style.boxShadow = '0 2px 10px rgba(33, 150, 243, 0.3)';
+                        playerElement.classList.add('pulse');
+                    }
+
+                    playerElement.innerHTML = `
+                        <div class="player-avatar" style="background: ${player.avatarColor}">
+                            ${player.pseudo.charAt(0).toUpperCase()}
+                        </div>
+                        <div class="player-name">
+                            ${player.pseudo}
+                            ${player.isHost ? '👑' : ''}
+                            ${isCurrentDrawer ? '✏️' : ''}
+                        </div>
+                        <div class="player-score">${player.score || 0}pts</div>
+                    `;
+                    
+                    container.appendChild(playerElement);
+                });
+            }
+        }
+
+        function updateGameState(gameState) {
+            document.getElementById('timer').textContent = gameState.timeLeft || 0;
+            document.getElementById('currentRound').textContent = gameState.currentRound || 1;
+            document.getElementById('totalRounds').textContent = gameState.totalRounds || 3;
+
+            // Gérer l'affichage du bouton de démarrage pour l'hôte
+            const startSection = document.getElementById('startGameSection');
+            if (currentPlayer && currentPlayer.isHost && gameState.status === 'waiting') {
+                startSection.style.display = 'block';
+                const startBtn = document.getElementById('startGameBtn');
+                startBtn.disabled = false;
+                startBtn.textContent = '🚀 Démarrer la partie';
+                startBtn.style.opacity = '1';
+            } else {
+                startSection.style.display = 'none';
+            }
+
+            // Mettre à jour le timer visuel
+            const timer = document.getElementById('timer');
+            if (gameState.timeLeft <= 10 && gameState.status === 'playing') {
+                timer.classList.add('shake');
+                timer.style.color = '#ff4757';
+            } else {
+                timer.classList.remove('shake');
+                timer.style.color = '#ff6b6b';
+            }
+
+            if (gameState.status === 'waiting') {
+                document.getElementById('currentWordDisplay').innerHTML = '⏳ <strong>En attente du démarrage...</strong>';
+                document.getElementById('currentWordDisplay').style.background = '#fff3e0';
+                document.getElementById('guessInput').disabled = true;
+                document.getElementById('guessInput').placeholder = 'En attente du début de partie...';
+            } else if (gameState.status === 'playing') {
+                if (gameState.currentPlayer === currentPlayer.id) {
+                    // C'est votre tour de dessiner
+                    document.getElementById('currentWordDisplay').innerHTML = `🎨 <strong>À vous de dessiner:</strong> ${gameState.currentWord}`;
+                    document.getElementById('currentWordDisplay').style.background = '#e8f5e8';
+                    document.getElementById('guessInput').disabled = true;
+                    document.getElementById('guessInput').placeholder = 'C\'est votre tour de dessiner !';
+                    
+                    // Débloquer les outils de dessin
+                    document.querySelectorAll('.tool-btn, .color-picker').forEach(el => {
+                        el.style.opacity = '1';
+                        el.style.pointerEvents = 'auto';
+                    });
+                } else {
+                    // Vous devez deviner
+                    const wordLength = gameState.currentWord.length;
+                    const hiddenWord = '_ '.repeat(wordLength).trim();
+                    document.getElementById('currentWordDisplay').innerHTML = `🤔 <strong>Devinez le mot:</strong> ${hiddenWord} (${wordLength} lettres)`;
+                    document.getElementById('currentWordDisplay').style.background = '#fff3e0';
+                    
+                    // Vérifier si ce joueur a déjà trouvé
+                    const hasGuessed = gameState.guessedPlayers && gameState.guessedPlayers.includes(currentPlayer.id);
+                    if (hasGuessed) {
+                        document.getElementById('guessInput').disabled = true;
+                        document.getElementById('guessInput').placeholder = 'Vous avez trouvé ! 🎉';
+                        document.getElementById('guessInput').style.background = '#e8f5e8';
+                    } else {
+                        document.getElementById('guessInput').disabled = false;
+                        document.getElementById('guessInput').placeholder = 'Tapez votre réponse...';
+                        document.getElementById('guessInput').style.background = 'white';
+                    }
+                    
+                    // Bloquer les outils de dessin
+                    document.querySelectorAll('.tool-btn, .color-picker').forEach(el => {
+                        el.style.opacity = '0.5';
+                        el.style.pointerEvents = 'none';
+                    });
+                }
+            } else if (gameState.status === 'ended') {
+                document.getElementById('currentWordDisplay').textContent = '🏁 Partie terminée !';
+                document.getElementById('guessInput').disabled = true;
+                document.getElementById('guessInput').placeholder = 'Partie terminée';
+            }
+        }
+
+        // Système de messages/chat
+        function sendGuess() {
+            const input = document.getElementById('guessInput');
+            const guess = input.value.trim().toLowerCase();
+
+            if (!guess || !currentRoom) return;
+
+            // Vérifier si c'est la bonne réponse
+            database.ref('rooms/' + currentRoom + '/gameState').once('value').then(snapshot => {
+                const gameState = snapshot.val();
+                const correctWord = gameState.currentWord.toLowerCase();
+                
+                if (guess === correctWord) {
+                    // Bonne réponse !
+                    const points = calculatePoints(gameState.timeLeft, gameState.timeLeft);
+                    
+                    // Mettre à jour le score du joueur
+                    database.ref('rooms/' + currentRoom + '/players/' + currentPlayer.id + '/score').transaction(currentScore => {
+                        return (currentScore || 0) + points;
+                    });
+                    
+                    // Ajouter le joueur à la liste des gagnants
+                    const guessedPlayers = gameState.guessedPlayers || [];
+                    if (!guessedPlayers.includes(currentPlayer.id)) {
+                        guessedPlayers.push(currentPlayer.id);
+                        database.ref('rooms/' + currentRoom + '/gameState/guessedPlayers').set(guessedPlayers);
+                    }
+                    
+                    // Message de succès
+                    const successMessage = {
+                        type: 'correct',
+                        player: currentPlayer.pseudo,
+                        content: `a trouvé le mot en ${60 - gameState.timeLeft}s ! (+${points} pts)`,
+                        timestamp: firebase.database.ServerValue.TIMESTAMP
+                    };
+                    
+                    database.ref('rooms/' + currentRoom + '/messages').push(successMessage);
+                    
+                    // Vérifier si tout le monde a trouvé (sauf le dessinateur)
+                    database.ref('rooms/' + currentRoom + '/players').once('value').then(playersSnapshot => {
+                        const players = playersSnapshot.val();
+                        const playerCount = Object.keys(players).length;
+                        if (guessedPlayers.length >= playerCount - 1) {
+                            // Tout le monde a trouvé, passer au tour suivant
+                            clearInterval(gameTimer);
+                            setTimeout(() => endRound(currentRoom), 2000);
+                        }
+                    });
+                } else {
+                    // Mauvaise réponse
+                    const message = {
+                        type: 'guess',
+                        player: currentPlayer.pseudo,
+                        content: guess,
+                        timestamp: firebase.database.ServerValue.TIMESTAMP
+                    };
+                    
+                    database.ref('rooms/' + currentRoom + '/messages').push(message);
+                }
+            });
+
+            input.value = '';
+        }
+
+        function calculatePoints(timeLeft, totalTime) {
+            // Plus on trouve vite, plus on gagne de points
+            const timeUsed = totalTime - timeLeft;
+            const maxPoints = 100;
+            const minPoints = 20;
+            
+            if (timeUsed <= 10) return maxPoints;
+            if (timeUsed >= 50) return minPoints;
+            
+            return Math.max(minPoints, maxPoints - Math.floor((timeUsed - 10) * 2));
+        }
+
+        function addSystemMessage(content) {
+            if (!currentRoom) return;
+
+            const message = {
+                type: 'system',
+                content: content,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            };
+
+            database.ref('rooms/' + currentRoom + '/messages').push(message);
+        }
+
+        function displayMessage(message) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageElement = document.createElement('div');
+            
+            if (message.type === 'system') {
+                messageElement.className = 'message system';
+                messageElement.textContent = message.content;
+            } else if (message.type === 'guess') {
+                messageElement.className = 'message guess';
+                messageElement.innerHTML = `<strong>${message.player}:</strong> ${message.content}`;
+            } else if (message.type === 'correct') {
+                messageElement.className = 'message correct';
+                messageElement.innerHTML = `🎉 <strong>${message.player}</strong> a trouvé le mot !`;
+            }
+
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Fonctions de dessin
+        let isDrawing = false;
+        let startX, startY;
+
+        function startDrawing(e) {
+            // Vérifier si c'est le tour du joueur
+            if (!canDraw()) return;
+
+            isDrawing = true;
+            const rect = canvas.getBoundingClientRect();
+            startX = e.clientX - rect.left;
+            startY = e.clientY - rect.top;
+
+            if (gameState.currentTool === 'pen' || gameState.currentTool === 'eraser') {
+                ctx.beginPath();
+                ctx.moveTo(startX, startY);
+            }
+        }
+
+        let lastDrawing = null;
+
+        function draw(e) {
+            if (!isDrawing || !canDraw()) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const currentX = e.clientX - rect.left;
+            const currentY = e.clientY - rect.top;
+
+            ctx.lineWidth = gameState.brushSize;
+            ctx.lineCap = 'round';
+
+            // Si on dessine une forme, on restaure d'abord le dernier état
+            if (['rect', 'circle', 'line'].includes(gameState.currentTool)) {
+                if (lastDrawing) {
+                    ctx.putImageData(lastDrawing, 0, 0);
+                }
+                // Sauvegarder l'état avant de dessiner la prévisualisation
+                if (!lastDrawing) {
+                    lastDrawing = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                }
+
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.strokeStyle = gameState.currentColor;
+
+                if (gameState.currentTool === 'rect') {
+                    ctx.beginPath();
+                    ctx.rect(startX, startY, currentX - startX, currentY - startY);
+                    ctx.stroke();
+                } else if (gameState.currentTool === 'circle') {
+                    const radius = Math.sqrt(Math.pow(currentX - startX, 2) + Math.pow(currentY - startY, 2));
+                    ctx.beginPath();
+                    ctx.arc(startX, startY, radius, 0, 2 * Math.PI);
+                    ctx.stroke();
+                } else if (gameState.currentTool === 'line') {
+                    ctx.beginPath();
+                    ctx.moveTo(startX, startY);
+                    ctx.lineTo(currentX, currentY);
+                    ctx.stroke();
+                }
+            } else {
+                lastDrawing = null;
+                if (gameState.currentTool === 'pen') {
+                    ctx.globalCompositeOperation = 'source-over';
+                    ctx.strokeStyle = gameState.currentColor;
+                    ctx.lineTo(currentX, currentY);
+                    ctx.stroke();
+                } else if (gameState.currentTool === 'eraser') {
+                    ctx.globalCompositeOperation = 'destination-out';
+                    ctx.lineTo(currentX, currentY);
+                    ctx.stroke();
+                }
+            }
+        }
+
+        function stopDrawing(e) {
+            if (!isDrawing) return;
+            isDrawing = false;
+
+            if (!canDraw()) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const endX = e ? e.clientX - rect.left : startX;
+            const endY = e ? e.clientY - rect.top : startY;
+
+            // Dessiner formes géométriques
+            if (gameState.currentTool === 'rect') {
+                drawRectangle(startX, startY, endX, endY);
+            } else if (gameState.currentTool === 'circle') {
+                drawCircle(startX, startY, endX, endY);
+            } else if (gameState.currentTool === 'line') {
+                drawLine(startX, startY, endX, endY);
+            } else if (gameState.currentTool === 'fill') {
+                floodFill(endX, endY, gameState.currentColor);
+            }
+
+            // Sauvegarder le canvas
+            saveCanvas();
+        }
+
+        function drawRectangle(x1, y1, x2, y2) {
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.strokeStyle = gameState.currentColor;
+            ctx.lineWidth = gameState.brushSize;
+            ctx.beginPath();
+            ctx.rect(x1, y1, x2 - x1, y2 - y1);
+            ctx.stroke();
+        }
+
+        function drawCircle(x1, y1, x2, y2) {
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.strokeStyle = gameState.currentColor;
+            ctx.lineWidth = gameState.brushSize;
+            const radius = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+            ctx.beginPath();
+            ctx.arc(x1, y1, radius, 0, 2 * Math.PI);
+            ctx.stroke();
+        }
+
+        function drawLine(x1, y1, x2, y2) {
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.strokeStyle = gameState.currentColor;
+            ctx.lineWidth = gameState.brushSize;
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+        }
+
+        function floodFill(x, y, fillColor) {
+            // Implémentation basique du pot de peinture
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const targetColor = getPixelColor(imageData, x, y);
+            
+            if (colorsMatch(targetColor, hexToRgb(fillColor))) return;
+            
+            const stack = [[x, y]];
+            const visited = new Set();
+
+            while (stack.length > 0) {
+                const [px, py] = stack.pop();
+                const key = `${px},${py}`;
+                
+                if (visited.has(key) || px < 0 || py < 0 || px >= canvas.width || py >= canvas.height) {
+                    continue;
+                }
+                
+                const currentColor = getPixelColor(imageData, px, py);
+                if (!colorsMatch(currentColor, targetColor)) {
+                    continue;
+                }
+                
+                visited.add(key);
+                setPixelColor(imageData, px, py, hexToRgb(fillColor));
+                
+                stack.push([px + 1, py], [px - 1, py], [px, py + 1], [px, py - 1]);
+            }
+
+            ctx.putImageData(imageData, 0, 0);
+        }
+
+        function handleTouch(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' : 
+                                            e.type === 'touchmove' ? 'mousemove' : 'mouseup', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            canvas.dispatchEvent(mouseEvent);
+        }
+
+        async function clearCanvas() {
+            const canDrawNow = await canDraw();
+            if (!canDrawNow) return;
+            
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            saveCanvas();
+        }
+
+        function saveCanvas() {
+            if (!currentRoom) return;
+            const canvasData = canvas.toDataURL();
+            database.ref('rooms/' + currentRoom + '/canvas').set(canvasData);
+        }
+
+        function loadCanvasFromData(dataURL) {
+            const img = new Image();
+            img.onload = function() {
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0);
+            };
+            img.src = dataURL;
+        }
+
+        function canDraw() {
+            // Vérifier si c'est le tour du joueur actuel
+            if (!currentRoom || !currentPlayer) return false;
+            
+            // Vérifier en temps réel si c'est le tour de ce joueur
+            return new Promise(resolve => {
+                database.ref('rooms/' + currentRoom + '/gameState').once('value').then(snapshot => {
+                    const gameState = snapshot.val();
+                    resolve(gameState && gameState.currentPlayer === currentPlayer.id && gameState.status === 'playing');
+                });
+            });
+        }
+
+        async function startDrawing(e) {
+            // Vérifier si c'est le tour du joueur
+            const canDrawNow = await canDraw();
+            if (!canDrawNow) return;
+
+            isDrawing = true;
+            const rect = canvas.getBoundingClientRect();
+            startX = e.clientX - rect.left;
+            startY = e.clientY - rect.top;
+
+            if (gameState.currentTool === 'pen' || gameState.currentTool === 'eraser') {
+                ctx.beginPath();
+                ctx.moveTo(startX, startY);
+            }
+        }
+
+        async function draw(e) {
+            if (!isDrawing) return;
+            
+            const canDrawNow = await canDraw();
+            if (!canDrawNow) {
+                stopDrawing();
+                return;
+            }
+
+            const rect = canvas.getBoundingClientRect();
+            const currentX = e.clientX - rect.left;
+            const currentY = e.clientY - rect.top;
+
+            ctx.lineWidth = gameState.brushSize;
+            ctx.lineCap = 'round';
+
+            if (gameState.currentTool === 'pen') {
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.strokeStyle = gameState.currentColor;
+                ctx.lineTo(currentX, currentY);
+                ctx.stroke();
+            } else if (gameState.currentTool === 'eraser') {
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.lineTo(currentX, currentY);
+                ctx.stroke();
+            }
+        }
+
+        async function stopDrawing(e) {
+            if (!isDrawing) return;
+            isDrawing = false;
+
+            const canDrawNow = await canDraw();
+            if (!canDrawNow) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const endX = e ? e.clientX - rect.left : startX;
+            const endY = e ? e.clientY - rect.top : startY;
+
+            // Dessiner formes géométriques
+            if (gameState.currentTool === 'rect') {
+                drawRectangle(startX, startY, endX, endY);
+            } else if (gameState.currentTool === 'circle') {
+                drawCircle(startX, startY, endX, endY);
+            } else if (gameState.currentTool === 'line') {
+                drawLine(startX, startY, endX, endY);
+            } else if (gameState.currentTool === 'fill') {
+                floodFill(endX, endY, gameState.currentColor);
+            }
+
+            // Sauvegarder le canvas
+            saveCanvas();
+        }
+
+        // Fonctions utilitaires
+        function generateRoomCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            for (let i = 0; i < 6; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        function generatePlayerId() {
+            return 'player_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+        }
+
+        function getPixelColor(imageData, x, y) {
+            const index = (y * imageData.width + x) * 4;
+            return [
+                imageData.data[index],
+                imageData.data[index + 1],
+                imageData.data[index + 2],
+                imageData.data[index + 3]
+            ];
+        }
+
+        function setPixelColor(imageData, x, y, color) {
+            const index = (y * imageData.width + x) * 4;
+            imageData.data[index] = color[0];
+            imageData.data[index + 1] = color[1];
+            imageData.data[index + 2] = color[2];
+            imageData.data[index + 3] = 255;
+        }
+
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? [
+                parseInt(result[1], 16),
+                parseInt(result[2], 16),
+                parseInt(result[3], 16),
+                255
+            ] : [0, 0, 0, 255];
+        }
+
+        function colorsMatch(color1, color2) {
+            return color1[0] === color2[0] && 
+                   color1[1] === color2[1] && 
+                   color1[2] === color2[2];
+        }
+
+        // Initialiser la couleur noire par défaut
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                const blackPicker = document.querySelector('.color-picker[data-color="#000000"]');
+                if (blackPicker) {
+                    blackPicker.style.border = '3px solid #333';
+                }
+            }, 100);
+        });
+    </script>
+</body>
+</html>
